@@ -1,0 +1,4 @@
+$kind: http-request
+url: http://localhost:3000/api/images/999
+method: GET
+order: 3000

@@ -1,0 +1,19 @@
+$kind: http-request
+url: http://localhost:3000/api/images/1
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "filename": "avatar_processed_06_09_2026.png",
+      "originalFormat": "png",
+      "targetFormat": "webp",
+      "width": 512,
+      "height": 512,
+      "filter": "grayscale",
+      "status": "completed",
+      "updatedAt": "2026-09-06T14:45:00.000Z"
+    }
+order: 6000

@@ -1,0 +1,12 @@
+$kind: http-request
+url: http://localhost:3000/api/images
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "filename": "corrupted_without_formats.png"
+    }
+order: 5000
