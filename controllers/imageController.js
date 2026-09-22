@@ -1,40 +1,40 @@
-let images = require("../models/imageModel");
+const { Image } = require("../models");
 
-exports.getAllImages = (req, res, next) => {
+exports.getAllImages = async (req, res, next) => {
   try {
-    let result = [...images];
     const { status, targetFormat } = req.query;
+    const whereConditions = {};
 
     if (status) {
-      result = result.filter(
-        (img) => img.status.toLowerCase() === status.toLowerCase(),
-      );
+      whereConditions.status = status;
     }
     if (targetFormat) {
-      result = result.filter(
-        (img) => img.targetFormat.toLowerCase() === targetFormat.toLowerCase(),
-      );
+      whereConditions.targetFormat = targetFormat;
     }
+
+    const images = await Image.findAll({
+      where: whereConditions,
+      order: [["id", "ASC"]],
+    });
 
     res.status(200).json({
       success: true,
-      count: result.length,
-      data: result,
+      count: images.length,
+      data: images,
     });
   } catch (error) {
     next(error);
   }
 };
 
-exports.getImageById = (req, res, next) => {
+exports.getImageById = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const image = images.find((img) => img.id === id);
+    const image = await Image.findByPk(req.params.id);
 
     if (!image) {
       return res.status(404).json({
         success: false,
-        error: `Изображение с ID ${req.params.id} не найдено`,
+        error: `Изображение с ID ${req.params.id} не найдено в базе данных`,
       });
     }
 
@@ -47,10 +47,17 @@ exports.getImageById = (req, res, next) => {
   }
 };
 
-exports.createImage = (req, res, next) => {
+exports.createImage = async (req, res, next) => {
   try {
-    const { filename, originalFormat, targetFormat, width, height, filter } =
-      req.body;
+    const {
+      filename,
+      originalFormat,
+      targetFormat,
+      width,
+      height,
+      filter,
+      fileSize,
+    } = req.body;
 
     if (!filename || !originalFormat || !targetFormat) {
       return res.status(400).json({
@@ -60,26 +67,20 @@ exports.createImage = (req, res, next) => {
       });
     }
 
-    const newId =
-      images.length > 0 ? Math.max(...images.map((img) => img.id)) + 1 : 1;
-
-    const newImage = {
-      id: newId,
+    const newImage = await Image.create({
       filename,
       originalFormat,
       targetFormat,
       width: width ? Number(width) : null,
       height: height ? Number(height) : null,
       filter: filter || "none",
+      fileSize: fileSize ? Number(fileSize) : 0,
       status: "pending",
-      createdAt: new Date().toISOString(),
-    };
-
-    images.push(newImage);
+    });
 
     res.status(201).json({
       success: true,
-      message: "Задача на конвертацию успешно добавлена",
+      message: "Задача на конвертацию успешно сохранена в БД",
       data: newImage,
     });
   } catch (error) {
@@ -87,15 +88,14 @@ exports.createImage = (req, res, next) => {
   }
 };
 
-exports.updateImage = (req, res, next) => {
+exports.updateImage = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const index = images.findIndex((img) => img.id === id);
+    const image = await Image.findByPk(req.params.id);
 
-    if (index === -1) {
+    if (!image) {
       return res.status(404).json({
         success: false,
-        error: `Изображение с ID ${id} не найдено`,
+        error: `Изображение с ID ${req.params.id} не найдено`,
       });
     }
 
@@ -107,6 +107,7 @@ exports.updateImage = (req, res, next) => {
       height,
       filter,
       status,
+      fileSize,
     } = req.body;
 
     if (!filename || !originalFormat || !targetFormat || !status) {
@@ -117,45 +118,44 @@ exports.updateImage = (req, res, next) => {
       });
     }
 
-    images[index] = {
-      ...images[index],
+    await image.update({
       filename,
       originalFormat,
       targetFormat,
-      width: width ? Number(width) : images[index].width,
-      height: height ? Number(height) : images[index].height,
-      filter: filter || images[index].filter,
+      width: width !== undefined ? Number(width) : image.width,
+      height: height !== undefined ? Number(height) : image.height,
+      filter: filter || image.filter,
       status,
-    };
+      fileSize: fileSize !== undefined ? Number(fileSize) : image.fileSize,
+    });
 
     res.status(200).json({
       success: true,
-      message: "Данные изображения успешно обновлены",
-      data: images[index],
+      message: "Запись в базе данных успешно обновлена",
+      data: image,
     });
   } catch (error) {
     next(error);
   }
 };
 
-exports.deleteImage = (req, res, next) => {
+exports.deleteImage = async (req, res, next) => {
   try {
-    const id = parseInt(req.params.id, 10);
-    const index = images.findIndex((img) => img.id === id);
+    const image = await Image.findByPk(req.params.id);
 
-    if (index === -1) {
+    if (!image) {
       return res.status(404).json({
         success: false,
-        error: `Изображение с ID ${id} не найдено`,
+        error: `Изображение с ID ${req.params.id} не найдено`,
       });
     }
 
-    const deletedImage = images.splice(index, 1)[0];
+    await image.destroy();
 
     res.status(200).json({
       success: true,
-      message: `Изображение с ID ${id} успешно удалено`,
-      data: deletedImage,
+      message: `Изображение с ID ${req.params.id} успешно удалено из БД`,
+      data: image,
     });
   } catch (error) {
     next(error);
