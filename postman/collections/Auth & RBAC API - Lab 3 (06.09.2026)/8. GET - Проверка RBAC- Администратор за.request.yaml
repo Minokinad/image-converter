@@ -1,0 +1,9 @@
+$kind: http-request
+name: "8. GET - Проверка RBAC: Администратор запрашивает админку (200 OK)"
+url: "{{baseUrl}}/auth/admin/users"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{adminToken}}"
+order: 8000

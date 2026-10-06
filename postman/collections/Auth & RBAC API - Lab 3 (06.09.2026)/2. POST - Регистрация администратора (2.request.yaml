@@ -1,0 +1,15 @@
+$kind: http-request
+name: 2. POST - Регистрация администратора (201 Created)
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "admin@converter2026.com",
+      "password": "admin_secret_pass_2026",
+      "role": "admin"
+    }
+order: 2000

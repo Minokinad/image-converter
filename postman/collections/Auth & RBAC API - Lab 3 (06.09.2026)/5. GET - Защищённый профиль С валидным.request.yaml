@@ -1,0 +1,9 @@
+$kind: http-request
+name: 5. GET - Защищённый профиль С валидным токеном (200 OK)
+url: "{{baseUrl}}/auth/profile"
+method: GET
+auth:
+  type: bearer
+  credentials:
+    token: "{{userToken}}"
+order: 5000

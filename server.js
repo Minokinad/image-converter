@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const { sequelize } = require("./models");
 const imageRoutes = require("./routes/imageRoutes");
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -13,28 +14,31 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use("/auth", authRoutes);
 app.use("/api/images", imageRoutes);
 
 app.get("/", (req, res) => {
   res.json({
-    message: "Image Converter API with PostgreSQL & Sequelize is active",
-    endpoints: "/api/images",
+    message: "Image Converter & Editor API with JWT Auth is running",
+    authEndpoints: "/auth/register, /auth/login, /auth/profile",
+    imageEndpoints: "/api/images",
   });
 });
 
 app.use((req, res, next) => {
-  res.status(404).json({
-    success: false,
-    error: `Маршрут ${req.originalUrl} не найден на сервере`,
-  });
+  res
+    .status(404)
+    .json({ success: false, error: `Маршрут ${req.originalUrl} не найден` });
 });
 
 app.use((err, req, res, next) => {
-  console.error("Глобальная ошибка сервера:", err);
-  res.status(err.status || 500).json({
-    success: false,
-    error: err.message || "Внутренняя ошибка сервера",
-  });
+  console.error("Глобальная ошибка:", err);
+  res
+    .status(err.status || 500)
+    .json({
+      success: false,
+      error: err.message || "Внутренняя ошибка сервера",
+    });
 });
 
 async function startServer() {
@@ -43,12 +47,10 @@ async function startServer() {
     console.log("Соединение с базой данных PostgreSQL успешно установлено.");
 
     app.listen(PORT, () => {
-      console.log(
-        `Сервер запущен и ожидает запросы на http://localhost:${PORT}`,
-      );
+      console.log(`Сервер запущен на http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Не удалось подключиться к базе данных:", error);
+    console.error("Ошибка подключения к БД:", error);
     process.exit(1);
   }
 }

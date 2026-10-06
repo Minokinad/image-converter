@@ -1,0 +1,15 @@
+$kind: http-request
+name: 1. POST - Регистрация пользователя (201 Created)
+url: "{{baseUrl}}/auth/register"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "user@converter2026.com",
+      "password": "user_password_2026",
+      "role": "user"
+    }
+order: 1000

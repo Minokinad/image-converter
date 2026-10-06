@@ -1,0 +1,7 @@
+$kind: http-request
+name: 6. GET - Защищённый профиль БЕЗ токена (401 Unauthorized)
+url: "{{baseUrl}}/auth/profile"
+method: GET
+auth:
+  type: noauth
+order: 6000

@@ -1,0 +1,23 @@
+$kind: http-request
+name: 3. POST - Вход пользователя (200 OK + автосохранение токена)
+url: "{{baseUrl}}/auth/login"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "email": "user@converter2026.com",
+      "password": "user_password_2026"
+    }
+scripts:
+  - type: afterResponse
+    code: |-
+      var jsonData = pm.response.json();
+      if (jsonData.token) {
+          pm.collectionVariables.set('userToken', jsonData.token);
+          console.log('Токен обычного пользователя сохранен автоматически!');
+      }
+    language: text/javascript
+order: 3000

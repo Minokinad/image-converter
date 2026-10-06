@@ -1,0 +1,6 @@
+$kind: collection
+description: "Лабораторная работа №3: Аутентификация через JWT, хеширование паролей bcrypt и ролевая модель (RBAC) для Image Converter API. Дата выполнения: 06.10.2026"
+variables:
+  baseUrl: http://localhost:3000
+  userToken: ""
+  adminToken: ""
