@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1,
+    "filename": "autumn_photo_2026.png",
+    "originalFormat": "png",
+    "targetFormat": "webp",
+    "width": 1920,
+    "height": 1080,
+    "filter": "vintage",
+    "status": "completed",
+    "createdAt": "2026-09-06T10:15:30.000Z",
+    "updatedAt": "2026-09-06T10:15:30.000Z"
+  },
+  {
+    "id": 2,
+    "filename": "banner_mockup.jpg",
+    "originalFormat": "jpg",
+    "targetFormat": "png",
+    "width": 1200,
+    "height": 630,
+    "filter": "none",
+    "status": "pending",
+    "createdAt": "2026-09-07T12:00:00.000Z",
+    "updatedAt": "2026-09-07T12:00:00.000Z"
+  },
+  {
+    "id": 3,
+    "filename": "avatar_portrait.png",
+    "originalFormat": "png",
+    "targetFormat": "webp",
+    "width": 512,
+    "height": 512,
+    "filter": "grayscale",
+    "status": "processing",
+    "createdAt": "2026-09-08T08:30:15.000Z",
+    "updatedAt": "2026-09-08T08:30:15.000Z"
+  }
+]

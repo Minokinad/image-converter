@@ -1,0 +1,16 @@
+<%- include('partials/header', { title: '404 - Страница не найдена' }) %>
+
+<div class="page-container page-center">
+  <div class="error-box">
+    <div class="error-code">404</div>
+    <h1 class="error-title">Запрашиваемый ресурс не найден</h1>
+    <p class="error-text">
+      Страница по адресу <code><%= url %></code> не существует, была перемещена или удалена.
+    </p>
+    <div class="error-actions">
+      <a href="/<%= authQuery %>" class="btn btn-primary">Вернуться на главную</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

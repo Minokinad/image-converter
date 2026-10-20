@@ -1,0 +1,144 @@
+<%- include('partials/header', { title: 'Создание задачи конвертации' }) %>
+
+<div class="page-container page-narrow">
+  <div class="breadcrumb">
+    <a href="/<%= authQuery %>">&larr; Вернуться к списку</a>
+  </div>
+
+  <div class="form-card">
+    <h1 class="form-title">Создание новой задачи</h1>
+    <p class="form-description">Параметры валидируются согласно <code>config/validationRules.json</code>.</p>
+
+    <% if (!user.isAuth) { %>
+      <div class="alert alert-warning">
+        <div class="alert-icon">⚠️</div>
+        <div>
+          <strong>Внимание: Вы находитесь в режиме Гостя.</strong>
+          <p>Создание задач доступно только администратору. Чтобы получить доступ, войдите с параметром <a href="/add?auth=1"><strong>?auth=1</strong></a>.</p>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (errors && errors.length > 0) { %>
+      <div class="alert alert-danger">
+        <div class="alert-icon">❌</div>
+        <div>
+          <strong>Обнаружены ошибки валидации:</strong>
+          <ul class="error-list">
+            <% errors.forEach(function(err) { %>
+              <li><%= err %></li>
+            <% }); %>
+          </ul>
+        </div>
+      </div>
+    <% } %>
+
+    <form action="/add<%= authQuery %>" method="POST" class="styled-form">
+      <div class="form-group">
+        <label for="filename">Имя файла (filename) <span class="required">*</span></label>
+        <input 
+          type="text" 
+          id="filename" 
+          name="filename" 
+          class="form-control" 
+          placeholder="например: banner_2026.png" 
+          value="<%= formData.filename || '' %>"
+          <%= !user.isAuth ? 'disabled' : '' %>
+          required
+        >
+        <small class="form-hint">Длина: от <%= rules.filename.minLength %> до <%= rules.filename.maxLength %> симв. Защита от пробелов (.trim()).</small>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-half">
+          <label for="originalFormat">Исходный формат <span class="required">*</span></label>
+          <select id="originalFormat" name="originalFormat" class="form-control" <%= !user.isAuth ? 'disabled' : '' %> required>
+            <% rules.allowedOriginalFormats.forEach(function(fmt) { %>
+              <option value="<%= fmt %>" <%= (formData.originalFormat === fmt) ? 'selected' : '' %>>
+                <%= fmt.toUpperCase() %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div class="form-group col-half">
+          <label for="targetFormat">Целевой формат <span class="required">*</span></label>
+          <select id="targetFormat" name="targetFormat" class="form-control" <%= !user.isAuth ? 'disabled' : '' %> required>
+            <% rules.allowedTargetFormats.forEach(function(fmt) { %>
+              <option value="<%= fmt %>" <%= (formData.targetFormat === fmt) ? 'selected' : (fmt === 'webp' ? 'selected' : '') %>>
+                <%= fmt.toUpperCase() %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-half">
+          <label for="width">Ширина (width, px) <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="width" 
+            name="width" 
+            class="form-control" 
+            min="<%= rules.dimensions.minWidth %>" 
+            max="<%= rules.dimensions.maxWidth %>" 
+            value="<%= typeof formData.width !== 'undefined' ? formData.width : 1920 %>"
+            <%= !user.isAuth ? 'disabled' : '' %>
+            required
+          >
+          <small class="form-hint">Строго &ge; <%= rules.dimensions.minWidth %></small>
+        </div>
+
+        <div class="form-group col-half">
+          <label for="height">Высота (height, px) <span class="required">*</span></label>
+          <input 
+            type="number" 
+            id="height" 
+            name="height" 
+            class="form-control" 
+            min="<%= rules.dimensions.minHeight %>" 
+            max="<%= rules.dimensions.maxHeight %>" 
+            value="<%= typeof formData.height !== 'undefined' ? formData.height : 1080 %>"
+            <%= !user.isAuth ? 'disabled' : '' %>
+            required
+          >
+          <small class="form-hint">Строго &ge; <%= rules.dimensions.minHeight %></small>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group col-half">
+          <label for="filter">Фильтр обработки</label>
+          <select id="filter" name="filter" class="form-control" <%= !user.isAuth ? 'disabled' : '' %>>
+            <% rules.allowedFilters.forEach(function(f) { %>
+              <option value="<%= f %>" <%= (formData.filter === f) ? 'selected' : '' %>>
+                <%= f %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+
+        <div class="form-group col-half">
+          <label for="status">Начальный статус</label>
+          <select id="status" name="status" class="form-control" <%= !user.isAuth ? 'disabled' : '' %>>
+            <% rules.allowedStatuses.forEach(function(st) { %>
+              <option value="<%= st %>" <%= (formData.status === st) ? 'selected' : '' %>>
+                <%= st %>
+              </option>
+            <% }); %>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-large" <%= !user.isAuth ? 'disabled' : '' %>>
+          Сохранить задачу
+        </button>
+        <a href="/<%= authQuery %>" class="btn btn-secondary btn-large">Отмена</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

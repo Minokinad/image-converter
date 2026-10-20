@@ -1,0 +1,29 @@
+<%- include('partials/header', { title: '500 - Ошибка сервера' }) %>
+
+<div class="page-container page-center">
+  <div class="error-box error-box-500">
+    <div class="error-code error-code-500">500</div>
+    <h1 class="error-title">Внутренняя ошибка сервера</h1>
+    <p class="error-text">
+      Это демонстрационная страница обработки исключения. Ошибка была перехвачена кастомным <strong>Error-handling Middleware</strong> со статус-кодом <strong>500</strong>.
+    </p>
+
+    <div class="error-details-box">
+      <strong>Сообщение ошибки:</strong>
+      <div class="error-message-text"><%= message %></div>
+      <% if (stack) { %>
+        <details class="error-stack-details">
+          <summary>Показать стек вызовов (для отладки)</summary>
+          <pre class="error-stack"><%= stack %></pre>
+        </details>
+      <% } %>
+    </div>
+
+    <div class="error-actions">
+      <a href="/<%= authQuery %>" class="btn btn-primary">На главную</a>
+      <a href="/trigger-500<%= authQuery %>" class="btn btn-secondary">Повторить триггер ошибки</a>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

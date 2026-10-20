@@ -1,0 +1,43 @@
+{
+  "filename": {
+    "minLength": 3,
+    "maxLength": 255
+  },
+  "allowedOriginalFormats": [
+    "png",
+    "jpg",
+    "jpeg",
+    "webp",
+    "gif",
+    "bmp",
+    "svg"
+  ],
+  "allowedTargetFormats": [
+    "png",
+    "jpg",
+    "jpeg",
+    "webp",
+    "gif",
+    "avif"
+  ],
+  "dimensions": {
+    "minWidth": 0,
+    "maxWidth": 10000,
+    "minHeight": 0,
+    "maxHeight": 10000
+  },
+  "allowedFilters": [
+    "none",
+    "grayscale",
+    "sepia",
+    "vintage",
+    "blur",
+    "invert"
+  ],
+  "allowedStatuses": [
+    "pending",
+    "processing",
+    "completed",
+    "failed"
+  ]
+}

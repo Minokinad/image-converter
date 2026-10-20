@@ -1,0 +1,67 @@
+<%- include('partials/header', { title: 'Детали задачи #' + image.id }) %>
+
+<div class="page-container page-narrow">
+  <div class="breadcrumb">
+    <a href="/<%= authQuery %>">&larr; Вернуться к списку задач</a>
+  </div>
+
+  <div class="detail-card">
+    <div class="detail-header">
+      <div>
+        <span class="card-id-large">Задача #<%= image.id %></span>
+        <h1 class="detail-title"><%= image.filename %></h1>
+      </div>
+      <span class="status-pill status-large status-<%= image.status %>">
+        <%= image.status %>
+      </span>
+    </div>
+
+    <div class="info-table">
+      <div class="info-row">
+        <span class="info-label">Исходный формат:</span>
+        <span class="info-data"><span class="badge-fmt"><%= image.originalFormat %></span></span>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Целевой формат:</span>
+        <span class="info-data"><span class="badge-fmt target"><%= image.targetFormat %></span></span>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Ширина (width):</span>
+        <span class="info-data"><%= image.width %> px</span>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Высота (height):</span>
+        <span class="info-data"><%= image.height %> px</span>
+      </div>
+
+      <div class="info-row">
+        <span class="info-label">Применяемый фильтр:</span>
+        <span class="info-data filter-tag"><%= image.filter %></span>
+      </div>
+
+      <div class="info-row highlight-row">
+        <span class="info-label">Точная дата создания (createdAt):</span>
+        <span class="info-data font-mono"><%= image.createdAt %></span>
+      </div>
+
+      <div class="info-row highlight-row">
+        <span class="info-label">Дата обновления (updatedAt):</span>
+        <span class="info-data font-mono"><%= image.updatedAt %></span>
+      </div>
+    </div>
+
+    <div class="detail-footer">
+      <a href="/<%= authQuery %>" class="btn btn-secondary">В список</a>
+      <% if (user && user.isAuth) { %>
+        <span class="admin-notice">Вы авторизованы как Администратор</span>
+      <% } else { %>
+        <span class="guest-notice">Режим просмотра: Гость</span>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('partials/footer') %>

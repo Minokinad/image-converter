@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= typeof title !== 'undefined' ? title : 'Image Converter' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-container">
+      <div class="header-logo">
+        <a href="/<%= authQuery %>">
+          <span class="logo-icon">🖼️</span>
+          <span class="logo-title">ImageConverter<span class="accent">Studio</span></span>
+        </a>
+      </div>
+
+      <nav class="header-nav">
+        <a href="/<%= authQuery %>" class="nav-link <%= currentPath === '/' ? 'active' : '' %>">
+          Все задачи
+        </a>
+        <a href="/add<%= authQuery %>" class="nav-link <%= currentPath === '/add' ? 'active' : '' %>">
+          Добавить задачу
+        </a>
+        <a href="/trigger-500<%= authQuery %>" class="nav-link nav-link-danger">
+          Тест 500
+        </a>
+      </nav>
+
+      <div class="header-auth">
+        <% if (user && user.isAuth) { %>
+          <span class="auth-badge badge-admin">
+            <span class="status-dot online"></span>
+            <%= user.name %>
+          </span>
+          <a href="<%= currentPath %>" class="btn-auth-switch btn-logout" title="Выйти в режим Гостя">
+            Выйти
+          </a>
+        <% } else { %>
+          <span class="auth-badge badge-guest">
+            <span class="status-dot offline"></span>
+            <%= user.name %>
+          </span>
+          <a href="<%= currentPath %>?auth=1" class="btn-auth-switch btn-login" title="Войти с параметром ?auth=1">
+            Войти (Админ)
+          </a>
+        <% } %>
+      </div>
+    </div>
+  </header>
+  <main class="main-content">

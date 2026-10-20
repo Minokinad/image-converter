@@ -1,0 +1,86 @@
+<%- include('partials/header', { title: 'Список задач | Image Converter' }) %>
+
+<div class="page-container">
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Задачи на конвертацию</h1>
+      <p class="page-subtitle">Всего зарегистрировано задач: <strong><%= images.length %></strong></p>
+    </div>
+    <a href="/add<%= authQuery %>" class="btn btn-primary">
+      <span>➕</span> Новая задача
+    </a>
+  </div>
+
+  <% if (images.length === 0) { %>
+    <div class="empty-state">
+      <div class="empty-icon">📂</div>
+      <h3>Список задач пуст</h3>
+      <p>Создайте первую задачу на обработку и конвертацию изображения.</p>
+      <a href="/add<%= authQuery %>" class="btn btn-primary">Создать задачу</a>
+    </div>
+  <% } else { %>
+    <div class="cards-grid">
+      <% images.forEach(function(img) { %>
+        <div class="task-card">
+          <div class="card-top">
+            <span class="card-id">#<%= img.id %></span>
+            <span class="status-pill status-<%= img.status %>">
+              <%= img.status %>
+            </span>
+          </div>
+
+          <h3 class="card-filename" title="<%= img.filename %>">
+            <%= img.filename %>
+          </h3>
+
+          <!-- Обязательное наглядное отображение времени создания (createdAt) -->
+          <div class="card-timestamp-box">
+            <span class="timestamp-icon">🕒</span>
+            <div class="timestamp-content">
+              <span class="timestamp-label">Дата и время создания:</span>
+              <strong class="timestamp-value">
+                <%= new Date(img.createdAt).toLocaleString('ru-RU', { 
+                      day: '2-digit', 
+                      month: '2-digit', 
+                      year: 'numeric', 
+                      hour: '2-digit', 
+                      minute: '2-digit', 
+                      second: '2-digit' 
+                    }) %>
+              </strong>
+            </div>
+          </div>
+
+          <div class="card-details">
+            <div class="detail-row">
+              <span class="detail-name">Формат:</span>
+              <span class="format-transformation">
+                <span class="badge-fmt"><%= img.originalFormat %></span>
+                <span class="arrow">&rarr;</span>
+                <span class="badge-fmt target"><%= img.targetFormat %></span>
+              </span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-name">Разрешение:</span>
+              <span class="detail-value"><%= img.width %> &times; <%= img.height %> px</span>
+            </div>
+
+            <div class="detail-row">
+              <span class="detail-name">Фильтр:</span>
+              <span class="detail-value filter-tag"><%= img.filter %></span>
+            </div>
+          </div>
+
+          <div class="card-actions">
+            <a href="/images/<%= img.id %><%= authQuery %>" class="btn btn-secondary btn-block">
+              Подробнее о задаче &rarr;
+            </a>
+          </div>
+        </div>
+      <% }); %>
+    </div>
+  <% } %>
+</div>
+
+<%- include('partials/footer') %>
