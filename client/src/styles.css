@@ -55,3 +55,11 @@ footer { display: flex; justify-content: space-between; color: #8a9aa3; font-siz
 @media (max-width: 1150px) { .workspace { padding: 32px 24px 20px; } .toolbar { grid-template-columns: 1fr 1fr; } .task { flex-wrap: wrap; } .task-actions { flex-direction: row; margin-left: 67px; width: calc(100% - 67px); flex-shrink: 0; } }
 @media (max-width: 800px) { .content-grid { grid-template-columns: 1fr; } .page-header { align-items: flex-start; flex-direction: column; gap: 4px; } .stats { grid-template-columns: 1fr 1fr; gap: 25px 0; } .stat:nth-child(2) { border: 0; } .local-note { line-height: 1.8; } }
 @media (max-width: 420px) { .workspace { padding: 24px 12px; } .panel { padding: 18px; } .toolbar { grid-template-columns: 1fr; } .stat { padding: 0 20px; } footer { gap: 15px; flex-wrap: wrap; } }
+
+fieldset { display: grid; gap: 18px; border: 0; margin: 0; padding: 0; min-width: 0; }
+button:disabled, fieldset:disabled { opacity: .65; cursor: wait; }
+.auth-panel { max-width: 440px; margin: 32px auto; }
+.account { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 12px; }
+.success { color: #116e60; background: #e9f5ee; }
+.spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #dce7ed; border-top-color: #168573; border-radius: 50%; animation: spin .8s linear infinite; margin-right: 12px; vertical-align: middle; }
+@keyframes spin { to { transform: rotate(360deg); } }
