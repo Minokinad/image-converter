@@ -33,7 +33,6 @@ body {
   min-height: 100vh;
 }
 
-/* ОБЯЗАТЕЛЬНОЕ ТРЕБОВАНИЕ: Зафиксированная шапка (sticky) */
 .app-header {
   position: sticky;
   top: 0;
@@ -196,7 +195,6 @@ body {
   font-size: 0.95rem;
 }
 
-/* Cards Grid */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -239,7 +237,6 @@ body {
   word-break: break-all;
 }
 
-/* Наглядное выделение времени создания */
 .card-timestamp-box {
   background-color: #f1f5f9;
   border-left: 3px solid var(--primary);
@@ -328,7 +325,6 @@ body {
   font-size: 0.8rem;
 }
 
-/* Status Pills */
 .status-pill {
   padding: 0.2rem 0.6rem;
   border-radius: 12px;
@@ -357,7 +353,6 @@ body {
   color: var(--danger);
 }
 
-/* Buttons */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -406,7 +401,6 @@ body {
   cursor: not-allowed;
 }
 
-/* Forms */
 .form-card, .detail-card {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
@@ -489,7 +483,6 @@ body {
   margin-top: 1rem;
 }
 
-/* Alerts */
 .alert {
   display: flex;
   gap: 0.75rem;
@@ -516,7 +509,6 @@ body {
   padding-left: 1.25rem;
 }
 
-/* Detail page */
 .breadcrumb {
   margin-bottom: 1rem;
 }
@@ -606,7 +598,6 @@ body {
   font-weight: 600;
 }
 
-/* Error Pages (404 and 500) */
 .error-box {
   background: var(--bg-surface);
   border: 1px solid var(--border-color);
@@ -678,7 +669,6 @@ body {
   gap: 1rem;
 }
 
-/* Empty State */
 .empty-state {
   background: var(--bg-surface);
   border: 2px dashed var(--border-color);
@@ -692,7 +682,6 @@ body {
   margin-bottom: 1rem;
 }
 
-/* Footer */
 .app-footer {
   border-top: 1px solid var(--border-color);
   background-color: var(--bg-surface);
@@ -723,4 +712,19 @@ body {
     gap: 0.5rem;
     text-align: center;
   }
+}
+.journal {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  background: #0f172a;
+  color: #e2e8f0;
+  padding: 1.25rem;
+  border-radius: 10px;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+}
+
+.journal {
+  max-height: 380px;
+  overflow: auto;
 }

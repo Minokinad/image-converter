@@ -7,7 +7,7 @@
 
   <div class="form-card">
     <h1 class="form-title">Создание новой задачи</h1>
-    <p class="form-description">Параметры валидируются согласно <code>config/validationRules.json</code>.</p>
+    <p class="form-description">Заполните параметры изображения. Перед сохранением сервер проверяет все поля.</p>
 
     <% if (!user.isAuth) { %>
       <div class="alert alert-warning">
@@ -45,8 +45,10 @@
           value="<%= formData.filename || '' %>"
           <%= !user.isAuth ? 'disabled' : '' %>
           required
+          minlength="3"
+          maxlength="255"
         >
-        <small class="form-hint">Длина: от <%= rules.filename.minLength %> до <%= rules.filename.maxLength %> симв. Защита от пробелов (.trim()).</small>
+        <small class="form-hint">Длина: от <%= rules.filename.minLength %> до <%= rules.filename.maxLength %> симв. Пробелы по краям удаляются.</small>
       </div>
 
       <div class="form-row">
@@ -77,7 +79,8 @@
         <div class="form-group col-half">
           <label for="width">Ширина (width, px) <span class="required">*</span></label>
           <input 
-            type="number" 
+            type="number"
+            step="1"
             id="width" 
             name="width" 
             class="form-control" 
@@ -93,7 +96,8 @@
         <div class="form-group col-half">
           <label for="height">Высота (height, px) <span class="required">*</span></label>
           <input 
-            type="number" 
+            type="number"
+            step="1"
             id="height" 
             name="height" 
             class="form-control" 

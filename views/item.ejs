@@ -44,12 +44,12 @@
 
       <div class="info-row highlight-row">
         <span class="info-label">Точная дата создания (createdAt):</span>
-        <span class="info-data font-mono"><%= image.createdAt %></span>
+        <span class="info-data font-mono"><%= formatDate(image.createdAt) %></span>
       </div>
 
       <div class="info-row highlight-row">
         <span class="info-label">Дата обновления (updatedAt):</span>
-        <span class="info-data font-mono"><%= image.updatedAt %></span>
+        <span class="info-data font-mono"><%= formatDate(image.updatedAt) %></span>
       </div>
     </div>
 

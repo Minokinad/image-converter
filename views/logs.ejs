@@ -1,0 +1,7 @@
+<%- include('partials/header', { title: 'Журнал запросов' }) %>
+<div class="page-container">
+  <h1 class="page-title">Журнал запросов</h1>
+  <p class="page-subtitle">Метод, адрес, статус ответа, время обработки и номер обращения. Последние 128 Кбайт журнала.</p>
+  <pre class="journal"><%= content %></pre>
+</div>
+<%- include('partials/footer') %>

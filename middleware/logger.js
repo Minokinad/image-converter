@@ -1,40 +1,41 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('node:fs/promises');
+const path = require('node:path');
 
-const logDirectory = path.join(__dirname, '..', 'logs');
-const logFilePath = path.join(logDirectory, 'app.log');
-
-try {
-  if (!fs.existsSync(logDirectory)) {
-    fs.mkdirSync(logDirectory, { recursive: true });
+function createLogger(file, output = true) {
+  let queue = Promise.resolve();
+  function middleware(req, res, next) {
+    const start = process.hrtime.bigint();
+    res.on('finish', () => {
+      const duration = Number(process.hrtime.bigint() - start) / 1000000;
+      const line = `[${new Date().toISOString()}] ${req.method} ${req.originalUrl} | Status: ${res.statusCode} | Duration: ${duration.toFixed(1)}ms | Request: ${req.requestId}\n`;
+      if (output) console.log(line.trim());
+      queue = queue.then(async () => {
+        await fs.mkdir(path.dirname(file), { recursive: true });
+        await fs.appendFile(file, line, 'utf8');
+      }).catch(err => { console.error('Не удалось записать журнал:', err.message); });
+    });
+    next();
   }
-} catch (err) {
-  console.error('Ошибка создания папки logs при инициализации:', err.message);
+  async function read() {
+    await queue;
+    try {
+      const handle = await fs.open(file, 'r');
+      try {
+        const info = await handle.stat();
+        if (!info.isFile()) throw new Error('По пути файла журнала находится каталог или другой объект.');
+        const { size } = info;
+        const length = Math.min(size, 128 * 1024);
+        const buffer = Buffer.alloc(length);
+        const { bytesRead } = await handle.read(buffer, 0, length, size - length);
+        return buffer.subarray(0, bytesRead).toString('utf8');
+      } finally { await handle.close(); }
+    } catch (err) {
+      if (err.code === 'ENOENT') return 'Записей пока нет.';
+      console.error('Не удалось прочитать журнал:', err.message);
+      return 'Журнал временно недоступен. Остальные страницы продолжают работать.';
+    }
+  }
+  return { middleware, read, flush: () => queue };
 }
 
-const logger = (req, res, next) => {
-  const startTime = Date.now();
-
-  res.on('finish', () => {
-    const duration = Date.now() - startTime;
-    const timestamp = new Date().toISOString();
-    const logLine = `[${timestamp}] ${req.method} ${req.originalUrl || req.url} | Status: ${res.statusCode} | Duration: ${duration}ms\n`;
-
-    try {
-      if (!fs.existsSync(logDirectory)) {
-        fs.mkdirSync(logDirectory, { recursive: true });
-      }
-      fs.appendFile(logFilePath, logLine, 'utf8', (err) => {
-        if (err) {
-          console.error('Ошибка записи в logs/app.log:', err.message);
-        }
-      });
-    } catch (err) {
-      console.error('Критический сбой записи лога:', err.message);
-    }
-  });
-
-  next();
-};
-
-module.exports = logger;
+module.exports = createLogger;
