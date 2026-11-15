@@ -1,0 +1,63 @@
+# Конвертер изображений · лабораторная работа №6
+
+| Хранилище | Данные |
+| --- | --- |
+| PostgreSQL, Sequelize | Аккаунты, хеши паролей, роли и задачи конвертации (`Users`, `Images`). |
+| MongoDB, Mongoose | Личные пресеты конвертации (`conversion_presets`). |
+
+В документе пресета `ownerId` соответствует идентификатору пользователя в PostgreSQL. Пресет содержит массив `outputs` с форматом, размерами и фильтром для каждого результата. В реляционной модели такие настройки можно было бы хранить в таблице пресетов и связанной таблице выходных форматов. Здесь отдельную настройку можно изменить позиционным оператором `$` в одном документе.
+
+## Запуск
+
+Понадобятся Node.js 22.12+ и npm. Для локальных баз используйте Docker Compose.
+
+```sh
+docker compose up -d --wait
+npm ci
+cp -n .env.example .env
+npx sequelize-cli db:migrate
+npm start
+```
+
+При первом запуске задайте собственное значение `JWT_SECRET` в `.env`. Если PostgreSQL уже запущен локально, поднимите только `docker compose up -d --wait mongo` и используйте параметры PostgreSQL из `config/config.json`. Для MongoDB Atlas задайте строку подключения с именем базы в `MONGO_URI`.
+
+Клиент запускается в отдельном терминале командой `npm --prefix client ci && npm --prefix client run dev`. API по умолчанию доступен на `http://localhost:3000`, клиент — на `http://127.0.0.1:5173`.
+
+## API пресетов
+
+Создайте аккаунт через `POST /api/auth/register` и получите токен через `POST /api/auth/login`. Оба запроса принимают JSON с `email` и `password`. Для всех запросов к пресетам передавайте заголовок `Authorization: Bearer <token>`. В URL используйте `_id` из ответа MongoDB.
+
+| Метод и путь | Действие |
+| --- | --- |
+| `GET /api/presets` | Список пресетов текущего пользователя. |
+| `GET /api/presets/:id` | Получить пресет. |
+| `POST /api/presets` | Создать пресет с именем и массивом настроек. |
+| `PUT /api/presets/:id` | Заменить имя и массив настроек пресета. |
+| `PATCH /api/presets/:id/outputs/:format` | Изменить `width`, `height` или `filter` выбранного формата. |
+| `DELETE /api/presets/:id` | Удалить пресет и вернуть удалённый документ. |
+
+Пример тела для `POST` или `PUT`.
+
+```json
+{
+  "name": "Для сайта",
+  "outputs": [
+    { "targetFormat": "webp", "width": 1200, "height": null, "filter": "none" },
+    { "targetFormat": "avif", "width": 640, "height": null, "filter": "grayscale" }
+  ]
+}
+```
+
+Отправьте `{"width": 960}` через `PATCH /api/presets/:id/outputs/webp`, чтобы поменять ширину WebP. Значение `null` для размера означает исходный размер. Поддерживаются `png`, `jpeg`, `webp`, `avif`, каждый формат может встречаться в пресете один раз.
+
+Чтобы посмотреть сохранённые документы, подключитесь через Compass по `MONGO_URI` или выполните команду.
+
+```sh
+docker compose exec mongo mongosh image_converter_db --quiet --eval 'db.conversion_presets.find().toArray()'
+```
+
+## Проверка в Postman
+
+Импортируйте `postman/lab6-presets.postman_collection.json` и запустите коллекцию целиком через **Run collection**. Она регистрирует тестового пользователя, сохраняет JWT и ID пресета в переменные коллекции, проверяет CRUD и обновление элемента массива. После прогона пресет удаляется, тестовый аккаунт остаётся в PostgreSQL.
+
+Чтобы увидеть вложенные настройки в Compass, выполните запросы по порядку до обновления ширины WebP, затем откройте `image_converter_db` → `conversion_presets` перед запросом на удаление.

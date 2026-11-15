@@ -1,0 +1,404 @@
+{
+  "info": {
+    "name": "Image Converter · Lab 6 · MongoDB",
+    "description": "Запускайте запросы по порядку. Коллекция создаёт тестовый аккаунт в PostgreSQL и удаляет созданный пресет в конце.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://127.0.0.1:3000/api"
+    },
+    {
+      "key": "testEmail",
+      "value": ""
+    },
+    {
+      "key": "testPassword",
+      "value": "lab6-postman-local-test"
+    },
+    {
+      "key": "ownerId",
+      "value": ""
+    },
+    {
+      "key": "token",
+      "value": ""
+    },
+    {
+      "key": "presetId",
+      "value": ""
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Регистрация тестового пользователя",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/register",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.collectionVariables.unset(\"token\");",
+              "pm.collectionVariables.unset(\"presetId\");",
+              "pm.collectionVariables.set(\"testEmail\", pm.variables.replaceIn(\"lab6-{{$guid}}@example.test\"));"
+            ]
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Аккаунт PostgreSQL создан\", () => {",
+              "  pm.expect(result.data.id).to.be.a(\"number\");",
+              "  pm.expect(result.data.role).to.equal(\"user\");",
+              "});",
+              "if (result.data && result.data.id) pm.collectionVariables.set(\"ownerId\", result.data.id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Вход и получение JWT",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/auth/login",
+        "auth": {
+          "type": "noauth"
+        },
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"{{testEmail}}\",\n  \"password\": \"{{testPassword}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"В ответе есть JWT\", () => pm.expect(result.token).to.be.a(\"string\").and.not.empty);",
+              "if (result.token) pm.collectionVariables.set(\"token\", result.token);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Список без токена",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/presets",
+        "auth": {
+          "type": "noauth"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Создать пресет с двумя форматами",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/presets",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Для сайта\",\n  \"outputs\": [\n    {\n      \"targetFormat\": \"webp\",\n      \"width\": 1200,\n      \"height\": null,\n      \"filter\": \"none\"\n    },\n    {\n      \"targetFormat\": \"avif\",\n      \"width\": 640,\n      \"height\": null,\n      \"filter\": \"grayscale\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Владелец и вложенные форматы сохранены\", () => {",
+              "  pm.expect(result.data.ownerId).to.equal(Number(pm.collectionVariables.get(\"ownerId\")));",
+              "  pm.expect(result.data.outputs.map(output => output.targetFormat)).to.deep.equal([\"webp\", \"avif\"]);",
+              "  pm.expect(result.data.outputs[0].height).to.equal(null);",
+              "});",
+              "if (result.data && result.data._id) pm.collectionVariables.set(\"presetId\", result.data._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Получить список пресетов",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/presets"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Новый пресет есть в списке\", () => {",
+              "  pm.expect(result.data.map(preset => preset._id)).to.include(pm.collectionVariables.get(\"presetId\"));",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Получить пресет по ID",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/presets/{{presetId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Получен нужный пресет\", () => {",
+              "  pm.expect(result.data._id).to.equal(pm.collectionVariables.get(\"presetId\"));",
+              "  pm.expect(result.data.name).to.equal(\"Для сайта\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Заменить настройки пресета",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/presets/{{presetId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"name\": \"Витрина\",\n  \"outputs\": [\n    {\n      \"targetFormat\": \"webp\",\n      \"width\": 1200,\n      \"height\": null,\n      \"filter\": \"none\"\n    },\n    {\n      \"targetFormat\": \"avif\",\n      \"width\": 640,\n      \"height\": null,\n      \"filter\": \"grayscale\"\n    }\n  ]\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Имя пресета изменено\", () => pm.expect(result.data.name).to.equal(\"Витрина\"));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Изменить ширину WebP внутри массива",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/presets/{{presetId}}/outputs/webp",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"width\": 960\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Обновлена ширина WebP, настройки AVIF сохранены\", () => {",
+              "  const webp = result.data.outputs.find(output => output.targetFormat === \"webp\");",
+              "  const avif = result.data.outputs.find(output => output.targetFormat === \"avif\");",
+              "  pm.expect(webp.width).to.equal(960);",
+              "  pm.expect(avif.width).to.equal(640);",
+              "  pm.expect(avif.filter).to.equal(\"grayscale\");",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Отклонить некорректную ширину",
+      "request": {
+        "method": "PATCH",
+        "url": "{{baseUrl}}/presets/{{presetId}}/outputs/webp",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"width\": -1\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(false));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Удалить пресет",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/presets/{{presetId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(true));",
+              "pm.test(\"Удалён нужный пресет\", () => pm.expect(result.data._id).to.equal(pm.collectionVariables.get(\"presetId\")));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Проверить удаление пресета",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/presets/{{presetId}}"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));",
+              "const result = pm.response.json();",
+              "pm.test(\"Ожидаемый результат\", () => pm.expect(result.success).to.equal(false));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

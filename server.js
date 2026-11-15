@@ -1,9 +1,11 @@
 require("dotenv").config();
 const express = require("express");
+const mongoose = require("mongoose");
 const cors = require("./middlewares/cors");
 const { sequelize } = require("./models");
 const imageRoutes = require("./routes/imageRoutes");
 const authRoutes = require("./routes/authRoutes");
+const presetRoutes = require("./routes/presetRoutes");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -19,12 +21,14 @@ app.use((req, res, next) => {
 app.use("/auth", authRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/images", imageRoutes);
+app.use("/api/presets", presetRoutes);
 
 app.get("/", (req, res) => {
   res.json({
     message: "Image Converter & Editor API with JWT Auth is running",
     authEndpoints: "/auth/register, /auth/login, /auth/profile",
     imageEndpoints: "/api/images",
+    presetEndpoints: "/api/presets",
   });
 });
 
@@ -46,14 +50,17 @@ app.use((err, req, res, next) => {
 
 async function startServer() {
   try {
+    if (!process.env.MONGO_URI) throw new Error("Укажите MONGO_URI в файле .env");
     await sequelize.authenticate();
     console.log("Соединение с базой данных PostgreSQL успешно установлено.");
+    await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
+    console.log("Соединение с базой данных MongoDB успешно установлено.");
 
     app.listen(PORT, () => {
       console.log(`Сервер запущен на http://localhost:${PORT}`);
     });
   } catch (error) {
-    console.error("Ошибка подключения к БД:", error);
+    console.error("Ошибка запуска сервера:", error.message);
     process.exit(1);
   }
 }
