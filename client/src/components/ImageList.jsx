@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
 import useImages from '../hooks/useImages.js';
+import usePresets from '../hooks/usePresets.js';
 import { filters, formats, statuses } from '../data/images.js';
 import ImageForm from './ImageForm.jsx';
+import PresetPanel from './PresetPanel.jsx';
 
 export default function ImageList({ user, onLogout, onUnauthorized }) {
   const { items, loading, loaded, error, notice, pending, save, remove, retry } = useImages(onUnauthorized);
+  const presets = usePresets(onUnauthorized);
   const saveStatus = pending ? 'Сохранение на сервере…' : loading ? 'Загрузка…' : error ? 'Ошибка запроса' : 'Данные синхронизированы';
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState('');
@@ -57,7 +60,8 @@ export default function ImageList({ user, onLogout, onUnauthorized }) {
           {[['Всего задач', items.length], ['Выполнено', completed], ['В очереди', items.length - completed], ['Общий размер, КБ', totalSize.toLocaleString('ru-RU')]].map(([label, value]) => <div className="stat" key={label}><span>{label}</span><strong>{value}</strong></div>)}
         </section>
         <div className="content-grid">
-          <ImageForm key={editingId ?? 'new'} image={editingImage} onSave={saveImage} onCancel={() => setEditingId(null)} pending={pending} />
+          <ImageForm key={editingId ?? 'new'} image={editingImage} presets={presets.items}
+            onSave={saveImage} onCancel={() => setEditingId(null)} pending={pending} />
           <section className="panel list-panel" aria-labelledby="list-title">
             <div className="section-heading"><span className="step">02</span><h2 id="list-title">Список задач</h2><span className="count">{visible.length} из {items.length}</span></div>
             <div className="toolbar">
@@ -78,7 +82,8 @@ export default function ImageList({ user, onLogout, onUnauthorized }) {
           </section>
         </div>
       </> : null}
-      <footer>Лабораторная работа № 5 <span>React · REST API · JWT</span></footer>
+      <PresetPanel presets={presets} />
+      <footer>Лабораторная работа № 6 <span>React · PostgreSQL · MongoDB</span></footer>
     </main>
   );
 }

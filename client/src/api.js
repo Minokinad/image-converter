@@ -39,3 +39,7 @@ export const deleteItem = (id) => request(`/images/${id}`, { method: 'DELETE' })
 export const login = (credentials) => request('/auth/login', { method: 'POST', body: credentials });
 export const register = (credentials) => request('/auth/register', { method: 'POST', body: credentials });
 export const fetchProfile = async (signal) => (await request('/auth/profile', { signal })).data;
+export const fetchPresets = async (signal) => (await request('/presets', { signal })).data;
+export const createPreset = async (preset) => (await request('/presets', { method: 'POST', body: preset })).data;
+export const replacePreset = async (id, preset) => (await request(`/presets/${id}`, { method: 'PUT', body: preset })).data;
+export const deletePreset = (id) => request(`/presets/${id}`, { method: 'DELETE' });

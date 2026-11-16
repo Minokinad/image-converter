@@ -3,13 +3,25 @@ import { filters, formats, statuses } from '../data/images.js';
 
 const emptyForm = { filename: '', originalFormat: 'png', targetFormat: 'webp', width: '', height: '', filter: 'none', status: 'pending', fileSize: '0' };
 
-export default function ImageForm({ image, onSave, onCancel, pending }) {
+export default function ImageForm({ image, presets, onSave, onCancel, pending }) {
   const [form, setForm] = useState(image ? { ...image, width: image.width ?? '', height: image.height ?? '' } : emptyForm);
   const [error, setError] = useState('');
 
   function update(event) {
     const { name, value } = event.target;
     setForm((previous) => ({ ...previous, [name]: value }));
+    setError('');
+  }
+
+  function applyPreset(event) {
+    const [id, format] = event.target.value.split('/');
+    const output = presets.find((preset) => preset._id === id)?.outputs
+      .find((item) => item.targetFormat === format);
+    if (!output) return;
+    const { targetFormat, width, height, filter } = output;
+    setForm((previous) => ({
+      ...previous, targetFormat, width: width ?? '', height: height ?? '', filter,
+    }));
     setError('');
   }
 
@@ -37,6 +49,23 @@ export default function ImageForm({ image, onSave, onCancel, pending }) {
       <form onSubmit={submit}>
         <fieldset disabled={pending}>
           <label>Имя файла<input name="filename" value={form.filename} onChange={update} required maxLength={255} placeholder="Например, photo.png" /></label>
+          <div className="preset-picker">
+            {presets.length > 0 && <label>Применить пресет
+              <select value="" onChange={applyPreset}>
+                <option value="" disabled>Выбрать пресет и формат</option>
+                {presets.map(({ _id, name, outputs }) => (
+                  <optgroup key={_id} label={name}>
+                    {outputs.map(({ targetFormat }) => (
+                      <option key={targetFormat} value={`${_id}/${targetFormat}`}>
+                        {name} · {targetFormat.toUpperCase()}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>}
+            <a href="#presets">Управление пресетами</a>
+          </div>
           <div className="field-pair">
             <label>Исходный формат<select name="originalFormat" value={form.originalFormat} onChange={update}>{formats.map((format) => <option key={format} value={format}>{format.toUpperCase()}</option>)}</select></label>
             <label>Целевой формат<select name="targetFormat" value={form.targetFormat} onChange={update}>{formats.map((format) => <option key={format} value={format}>{format.toUpperCase()}</option>)}</select></label>

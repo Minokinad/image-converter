@@ -63,3 +63,24 @@ button:disabled, fieldset:disabled { opacity: .65; cursor: wait; }
 .success { color: #116e60; background: #e9f5ee; }
 .spinner { display: inline-block; width: 20px; height: 20px; border: 3px solid #dce7ed; border-top-color: #168573; border-radius: 50%; animation: spin .8s linear infinite; margin-right: 12px; vertical-align: middle; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.preset-picker { display: grid; gap: 8px; }
+.preset-picker a { width: fit-content; color: #116e60; font-size: 12px; text-underline-offset: 3px; }
+.presets-panel { margin-top: 24px; scroll-margin-top: 20px; }
+.presets-add { margin-left: auto; }
+.preset-layout { margin-top: 16px; }
+.preset-layout.editing { display: grid; grid-template-columns: minmax(0, 1fr) minmax(280px, 370px); align-items: start; gap: 20px; }
+.preset-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); gap: 12px; }
+.preset-list > .muted { margin: 0; }
+.preset-card, .preset-form { min-width: 0; padding: 16px; border: 1px solid #e1e7e9; border-radius: 10px; background: #fafcfc; }
+.preset-card ul { display: grid; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
+.preset-card li { display: flex; align-items: baseline; flex-wrap: wrap; gap: 6px 10px; color: #526571; font-size: 12px; }
+.preset-card li strong { color: #116e60; }
+.preset-output { gap: 10px; padding: 12px; border: 1px solid #dce3e7; border-radius: 8px; }
+.preset-output legend { padding: 0 6px; color: #116e60; font-size: 12px; font-weight: 800; }
+.preset-form h3 { margin: 0; }
+
+@media (max-width: 800px) {
+  .preset-layout.editing { grid-template-columns: minmax(0, 1fr); }
+  .preset-form { grid-row: 1; }
+}
