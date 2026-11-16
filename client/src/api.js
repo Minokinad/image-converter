@@ -1,4 +1,5 @@
 const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000/api').replace(/\/$/, '');
+export const socketUrl = import.meta.env.VITE_SOCKET_URL || new URL(baseUrl, window.location.href).origin;
 
 export class ApiError extends Error {
   constructor(message, status = 0) {

@@ -4,8 +4,9 @@ import usePresets from '../hooks/usePresets.js';
 import { filters, formats, statuses } from '../data/images.js';
 import ImageForm from './ImageForm.jsx';
 import PresetPanel from './PresetPanel.jsx';
+import NotificationPanel from './NotificationPanel.jsx';
 
-export default function ImageList({ user, onLogout, onUnauthorized }) {
+export default function ImageList({ user, token, onLogout, onUnauthorized }) {
   const { items, loading, loaded, error, notice, pending, save, remove, retry } = useImages(onUnauthorized);
   const presets = usePresets(onUnauthorized);
   const saveStatus = pending ? 'Сохранение на сервере…' : loading ? 'Загрузка…' : error ? 'Ошибка запроса' : 'Данные синхронизированы';
@@ -53,6 +54,7 @@ export default function ImageList({ user, onLogout, onUnauthorized }) {
         <div className="account"><span>{user.email}</span><button onClick={onLogout} disabled={pending}>Выйти</button><div className="save-state" role="status"><span className={error ? 'dot failed' : 'dot'} />{saveStatus}</div></div>
       </header>
       <p className="local-note">Задачи хранятся на сервере. Здесь вы управляете параметрами; конвертация файлов не выполняется.</p>
+      <NotificationPanel token={token} onUnauthorized={onUnauthorized} />
       {notice && <p className="notice success" role="status">{notice}</p>}
       {error && <p className="error notice" role="alert">{error} {!loaded && <button onClick={retry} disabled={loading}>Повторить</button>}</p>}
       {loading ? <section className="panel loading" role="status" aria-busy="true"><span className="spinner" />Загрузка задач…</section> : loaded ? <>
@@ -83,7 +85,7 @@ export default function ImageList({ user, onLogout, onUnauthorized }) {
         </div>
       </> : null}
       <PresetPanel presets={presets} />
-      <footer>Лабораторная работа № 6 <span>React · PostgreSQL · MongoDB</span></footer>
+      <footer>Лабораторная работа № 7 <span>React · Express · Socket.IO</span></footer>
     </main>
   );
 }

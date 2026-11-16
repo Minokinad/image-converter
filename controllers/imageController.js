@@ -77,6 +77,7 @@ exports.createImage = async (req, res, next) => {
       fileSize: fileSize ? Number(fileSize) : 0,
       status: "pending",
     });
+    req.app.locals.publishTaskEvent("created", newImage);
 
     res.status(201).json({
       success: true,
@@ -118,6 +119,7 @@ exports.updateImage = async (req, res, next) => {
       });
     }
 
+    const previousFormat = image.targetFormat;
     await image.update({
       filename,
       originalFormat,
@@ -128,6 +130,7 @@ exports.updateImage = async (req, res, next) => {
       status,
       fileSize: fileSize !== undefined ? Number(fileSize) : image.fileSize,
     });
+    req.app.locals.publishTaskEvent("updated", image, previousFormat);
 
     res.status(200).json({
       success: true,
@@ -151,6 +154,7 @@ exports.deleteImage = async (req, res, next) => {
     }
 
     await image.destroy();
+    req.app.locals.publishTaskEvent("deleted", image);
 
     res.status(200).json({
       success: true,

@@ -36,7 +36,7 @@ export default function App() {
     setError('');
   }
 
-  if (token && user) return <ImageList key={token} user={user} onLogout={logout} onUnauthorized={expire} />;
+  if (token && user) return <ImageList key={token} user={user} token={token} onLogout={logout} onUnauthorized={expire} />;
 
   return <main className="workspace">
     <header className="page-header"><div><p className="eyebrow">IMAGE CONVERTER</p><h1>Задачи конвертации<span>.</span></h1></div></header>

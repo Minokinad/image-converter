@@ -2,8 +2,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
-const JWT_SECRET =
-  process.env.JWT_SECRET || "super_secret_image_converter_jwt_key_2026";
+const JWT_SECRET = require("../config/jwt");
 
 exports.register = async (req, res, next) => {
   try {

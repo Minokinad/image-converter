@@ -1,4 +1,5 @@
 const jwt = require("jsonwebtoken");
+const JWT_SECRET = require("../config/jwt");
 
 module.exports = (req, res, next) => {
   try {
@@ -21,10 +22,7 @@ module.exports = (req, res, next) => {
 
     const token = parts[1];
 
-    const decoded = jwt.verify(
-      token,
-      process.env.JWT_SECRET || "super_secret_image_converter_jwt_key_2026",
-    );
+    const decoded = jwt.verify(token, JWT_SECRET);
 
     req.user = decoded; // { id, email, role, iat, exp }
     next();

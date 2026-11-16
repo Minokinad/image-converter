@@ -1,4 +1,5 @@
 require("dotenv").config();
+const http = require("node:http");
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("./middlewares/cors");
@@ -6,8 +7,11 @@ const { sequelize } = require("./models");
 const imageRoutes = require("./routes/imageRoutes");
 const authRoutes = require("./routes/authRoutes");
 const presetRoutes = require("./routes/presetRoutes");
+const attachNotifications = require("./realtime/notifications");
 
 const app = express();
+const server = http.createServer(app);
+app.locals.publishTaskEvent = attachNotifications(server);
 const PORT = process.env.PORT || 3000;
 
 app.use(cors);
@@ -56,7 +60,7 @@ async function startServer() {
     await mongoose.connect(process.env.MONGO_URI, { serverSelectionTimeoutMS: 5000 });
     console.log("Соединение с базой данных MongoDB успешно установлено.");
 
-    app.listen(PORT, () => {
+    server.listen(PORT, () => {
       console.log(`Сервер запущен на http://localhost:${PORT}`);
     });
   } catch (error) {

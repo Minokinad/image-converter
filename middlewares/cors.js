@@ -1,6 +1,4 @@
-const origins = (process.env.CLIENT_ORIGIN || "http://127.0.0.1:5173,http://localhost:5173")
-  .split(",")
-  .map((origin) => origin.trim());
+const origins = require("../config/clientOrigins");
 
 module.exports = (req, res, next) => {
   res.vary("Origin");
