@@ -1,0 +1,10 @@
+.git
+.idea
+.venv
+**/node_modules
+**/.env*
+client
+postman
+seeders
+README.md
+docker-compose.yml

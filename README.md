@@ -1,6 +1,6 @@
-# Конвертер изображений · лабораторная работа № 7
+# Конвертер изображений · лабораторная работа № 8
 
-Ветка `27` добавляет синхронизацию общего списка задач и уведомления через Socket.IO. Express и Socket.IO используют один HTTP-сервер, вход на сайт открывает соединение с действующим JWT.
+Ветка `28` запускает конвертер в четырёх контейнерах. Nginx отдаёт сборку React и проксирует REST API и Socket.IO в Express. Данные сохраняются в именованных томах PostgreSQL и MongoDB.
 
 | Хранилище | Данные |
 | --- | --- |
@@ -11,21 +11,29 @@
 
 ## Запуск
 
-Понадобятся Node.js 22.12+ и npm. Для локальных баз используйте Docker Compose.
+Понадобятся Docker Engine и Docker Compose v2 или новее.
 
 ```sh
-docker compose up -d --wait
-npm ci
 cp -n .env.example .env
-npx sequelize-cli db:migrate
-npm start
+docker compose up --build
 ```
 
-При первом запуске задайте собственное значение `JWT_SECRET` в `.env`. Если PostgreSQL уже запущен локально, поднимите только `docker compose up -d --wait mongo` и используйте параметры PostgreSQL из `config/config.json`. Для MongoDB Atlas задайте строку подключения с именем базы в `MONGO_URI`.
+Перед запуском задайте в `.env` свои значения `JWT_SECRET` и `POSTGRES_PASSWORD`. Для запуска в фоне используйте `docker compose up --build --detach --wait`. При запуске Express дожидается готовности обеих баз через Compose и применяет миграции Sequelize перед открытием HTTP-порта.
 
-Клиент запускается в отдельном терминале командой `npm --prefix client ci && npm --prefix client run dev`. API по умолчанию доступен на `http://localhost:3000`, клиент — на `http://127.0.0.1:5173`.
+| Назначение | Адрес или команда |
+| --- | --- |
+| Сайт | [http://localhost](http://localhost) |
+| Express | [http://localhost:5000](http://localhost:5000) |
+| Проверка процесса Express | `curl -f http://localhost:5000/health` |
+| Контейнеры и их состояние | `docker compose ps` |
+| Логи Express | `docker compose logs -f backend` |
+| Остановить стек с сохранением данных | `docker compose down` |
 
-Клиент подключается к Socket.IO по адресу сервера из `VITE_API_URL`. Если у сокетов отдельный адрес, укажите `VITE_SOCKET_URL` в `client/.env.local`. Для другого адреса клиента задайте на сервере `CLIENT_ORIGIN` со списком разрешённых адресов, разделённых запятыми.
+Если порт 80 занят, задайте `FRONTEND_PORT=8080` в `.env` и откройте [http://localhost:8080](http://localhost:8080). Порт Express меняется через `BACKEND_PORT`. Базы доступны внутри сети Compose по именам `postgres` и `mongo`. Docker публикует порты сайта и Express только на loopback.
+
+Сборка использует образы `node:24-alpine`, `nginx:alpine`, `postgres:16-alpine` и `mongo:8.0` из Docker Hub. Если реестр недоступен, настройте доступное зеркало в Docker Engine и повторите сборку.
+
+Для разработки с локально запущенными базами используйте `npm ci`, `npm run db:migrate` и `npm start`. Клиент запускается отдельно через `npm --prefix client ci && npm --prefix client run dev`, с адресом API из `client/.env`.
 
 ## Проверка синхронизации в двух окнах
 
@@ -69,7 +77,7 @@ npm start
 
 Отправьте `{"width": 960}` через `PATCH /api/presets/:id/outputs/webp`, чтобы поменять ширину WebP. Значение `null` для размера означает исходный размер. Поддерживаются `png`, `jpeg`, `webp`, `avif`, каждый формат может встречаться в пресете один раз.
 
-Чтобы посмотреть сохранённые документы, подключитесь через Compass по `MONGO_URI` или выполните команду.
+Чтобы посмотреть сохранённые документы в контейнере, выполните команду.
 
 ```sh
 docker compose exec mongo mongosh image_converter_db --quiet --eval 'db.conversion_presets.find().toArray()'
@@ -77,6 +85,6 @@ docker compose exec mongo mongosh image_converter_db --quiet --eval 'db.conversi
 
 ## Проверка в Postman
 
-Импортируйте `postman/lab6-presets.postman_collection.json` и запустите коллекцию целиком через **Run collection**. Она регистрирует тестового пользователя, сохраняет JWT и ID пресета в переменные коллекции, проверяет CRUD и обновление элемента массива. После прогона пресет удаляется, тестовый аккаунт остаётся в PostgreSQL.
+Импортируйте `postman/lab6-presets.postman_collection.json`, задайте переменную `baseUrl` равной `http://localhost:5000` и запустите коллекцию через **Run collection**. Она регистрирует тестового пользователя, сохраняет JWT и ID пресета в переменные коллекции, проверяет CRUD и обновление элемента массива. После прогона пресет удаляется, тестовый аккаунт остаётся в PostgreSQL.
 
-Чтобы увидеть вложенные настройки в Compass, выполните запросы по порядку до обновления ширины WebP, затем откройте `image_converter_db` → `conversion_presets` перед запросом на удаление.
+Чтобы увидеть вложенные настройки, выполните запросы по порядку до обновления ширины WebP и проверьте содержимое `conversion_presets` перед запросом на удаление.
