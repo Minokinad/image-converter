@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { addItem, deleteItem, fetchItems, updateItem } from '../api.js';
 
 export default function useImages(onUnauthorized) {
@@ -6,11 +6,16 @@ export default function useImages(onUnauthorized) {
   const [loading, setLoading] = useState(true);
   const [loaded, setLoaded] = useState(false);
   const [error, setError] = useState('');
+  const [loadError, setLoadError] = useState('');
   const [notice, setNotice] = useState('');
   const [pending, setPending] = useState(false);
   const [attempt, setAttempt] = useState(0);
   const active = useRef(false);
   const busy = useRef(false);
+  const revision = useRef(0);
+  const refresh = useCallback(() => {
+    setAttempt(++revision.current);
+  }, []);
 
   useEffect(() => {
     active.current = true;
@@ -18,26 +23,29 @@ export default function useImages(onUnauthorized) {
   }, []);
 
   useEffect(() => {
+    if (pending || busy.current) return;
     const controller = new AbortController();
+    const obsolete = () => controller.signal.aborted || busy.current || revision.current !== attempt;
     setLoading(true);
-    setError('');
+    setLoadError('');
     fetchItems(controller.signal).then((data) => {
-      if (controller.signal.aborted) return;
+      if (obsolete()) return;
       setItems(data);
       setLoaded(true);
     }).catch((failure) => {
-      if (controller.signal.aborted) return;
+      if (obsolete()) return;
       if (failure.status === 401) onUnauthorized();
-      else setError(failure.message);
+      else setLoadError(failure.message);
     }).finally(() => {
-      if (!controller.signal.aborted) setLoading(false);
+      if (!obsolete()) setLoading(false);
     });
     return () => controller.abort();
-  }, [attempt, onUnauthorized]);
+  }, [attempt, onUnauthorized, pending]);
 
   async function mutate(optimistic, send, commit, rollback, message) {
     if (busy.current) return false;
     busy.current = true;
+    revision.current += 1;
     setPending(true);
     setError('');
     setNotice('');
@@ -52,11 +60,14 @@ export default function useImages(onUnauthorized) {
       if (!active.current) return false;
       setItems(rollback);
       if (failure.status === 401) onUnauthorized();
-      else setError(`${failure.message} Изменение отменено.`);
+      else setError(failure.message);
       return false;
     } finally {
       busy.current = false;
-      if (active.current) setPending(false);
+      if (active.current) {
+        setPending(false);
+        refresh();
+      }
     }
   }
 
@@ -92,5 +103,5 @@ export default function useImages(onUnauthorized) {
     );
   }
 
-  return { items, loading, loaded, error, notice, pending, save, remove, retry: () => { if (!busy.current) setAttempt((value) => value + 1); } };
+  return { items, loading, loaded, loadError, error, notice, pending, save, remove, refresh };
 }

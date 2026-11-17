@@ -7,9 +7,9 @@ import PresetPanel from './PresetPanel.jsx';
 import NotificationPanel from './NotificationPanel.jsx';
 
 export default function ImageList({ user, token, onLogout, onUnauthorized }) {
-  const { items, loading, loaded, error, notice, pending, save, remove, retry } = useImages(onUnauthorized);
+  const { items, loading, loaded, loadError, error, notice, pending, save, remove, refresh } = useImages(onUnauthorized);
   const presets = usePresets(onUnauthorized);
-  const saveStatus = pending ? 'Сохранение на сервере…' : loading ? 'Загрузка…' : error ? 'Ошибка запроса' : 'Данные синхронизированы';
+  const saveStatus = pending ? 'Сохранение на сервере…' : loading ? 'Обновление списка…' : loadError ? 'Ошибка загрузки' : 'Список загружен';
   const [editingId, setEditingId] = useState(null);
   const [search, setSearch] = useState('');
   const [status, setStatus] = useState('all');
@@ -51,18 +51,20 @@ export default function ImageList({ user, token, onLogout, onUnauthorized }) {
     <main className="workspace">
       <header className="page-header">
         <div><p className="eyebrow">IMAGE CONVERTER / БИБЛИОТЕКА ИЗОБРАЖЕНИЙ</p><h1>Задачи конвертации<span>.</span></h1><p className="intro">Управляйте параметрами изображений в одном месте.</p></div>
-        <div className="account"><span>{user.email}</span><button onClick={onLogout} disabled={pending}>Выйти</button><div className="save-state" role="status"><span className={error ? 'dot failed' : 'dot'} />{saveStatus}</div></div>
+        <div className="account"><span>{user.email}</span><button onClick={onLogout} disabled={pending}>Выйти</button><div className="save-state" role="status"><span className={loadError ? 'dot failed' : 'dot'} />{saveStatus}</div></div>
       </header>
       <p className="local-note">Задачи хранятся на сервере. Здесь вы управляете параметрами; конвертация файлов не выполняется.</p>
-      <NotificationPanel token={token} onUnauthorized={onUnauthorized} />
+      <NotificationPanel token={token} onUnauthorized={onUnauthorized} onQueueChange={refresh} />
       {notice && <p className="notice success" role="status">{notice}</p>}
-      {error && <p className="error notice" role="alert">{error} {!loaded && <button onClick={retry} disabled={loading}>Повторить</button>}</p>}
-      {loading ? <section className="panel loading" role="status" aria-busy="true"><span className="spinner" />Загрузка задач…</section> : loaded ? <>
+      {error && <p className="error notice" role="alert">{error}</p>}
+      {loadError && <p className="error notice" role="alert">{loadError}{' '}
+        <button onClick={refresh} disabled={loading || pending}>Обновить список</button></p>}
+      {loaded ? <>
         <section className="stats" aria-label="Статистика">
           {[['Всего задач', items.length], ['Выполнено', completed], ['В очереди', items.length - completed], ['Общий размер, КБ', totalSize.toLocaleString('ru-RU')]].map(([label, value]) => <div className="stat" key={label}><span>{label}</span><strong>{value}</strong></div>)}
         </section>
         <div className="content-grid">
-          <ImageForm key={editingId ?? 'new'} image={editingImage} presets={presets.items}
+          <ImageForm key={editingImage?.id ?? 'new'} image={editingImage} presets={presets.items}
             onSave={saveImage} onCancel={() => setEditingId(null)} pending={pending} />
           <section className="panel list-panel" aria-labelledby="list-title">
             <div className="section-heading"><span className="step">02</span><h2 id="list-title">Список задач</h2><span className="count">{visible.length} из {items.length}</span></div>
@@ -83,7 +85,7 @@ export default function ImageList({ user, token, onLogout, onUnauthorized }) {
             </div>
           </section>
         </div>
-      </> : null}
+      </> : loading ? <section className="panel loading" role="status" aria-busy="true"><span className="spinner" />Загрузка задач…</section> : null}
       <PresetPanel presets={presets} />
       <footer>Лабораторная работа № 7 <span>React · Express · Socket.IO</span></footer>
     </main>

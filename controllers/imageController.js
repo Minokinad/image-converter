@@ -119,7 +119,6 @@ exports.updateImage = async (req, res, next) => {
       });
     }
 
-    const previousFormat = image.targetFormat;
     await image.update({
       filename,
       originalFormat,
@@ -130,7 +129,7 @@ exports.updateImage = async (req, res, next) => {
       status,
       fileSize: fileSize !== undefined ? Number(fileSize) : image.fileSize,
     });
-    req.app.locals.publishTaskEvent("updated", image, previousFormat);
+    req.app.locals.publishTaskEvent("updated", image);
 
     res.status(200).json({
       success: true,

@@ -81,8 +81,6 @@ button:disabled, fieldset:disabled { opacity: .65; cursor: wait; }
 .preset-form h3 { margin: 0; }
 
 .notifications { margin-bottom: 24px; }
-.notification-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 12px; }
-.notification-header label { min-width: 150px; }
 .notification-status { margin: 7px 0 0; color: #526571; font-size: 12px; }
 .notification-log { max-height: 132px; overflow: auto; margin-top: 14px; border-top: 1px solid #eaf0f2; color: #273c48; font-size: 12px; }
 .notification-log p { margin: 12px 0 0; color: #526571; }
